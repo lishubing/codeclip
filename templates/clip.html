@@ -1,0 +1,47 @@
+{% extends "bootstrap/base.html" %}
+{% block styles -%}
+    {{ super() }}
+    <link rel="stylesheet"
+          href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/styles/default.min.css">
+{% endblock %}
+{% block scripts -%}
+    {{ super() }}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js"></script>
+    <script src="http://cdn.bootcss.com/zclip/1.1.2/jquery.zclip.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script>
+        var zClipSwf = 'http://cdn.bootcss.com/zclip/1.1.2/ZeroClipboard.swf';
+        var alert = function(){};
+        $("#copy").zclip({
+            path: zClipSwf,
+            copy: $("#copy").text(),
+            afterCopy: function(){
+                $("#copy").attr("class","btn btn-success btn-block")
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block title %}Code Clip{% endblock %}
+
+{% block content %}
+
+    <div class="container" style="margin-top: 100px">
+        {% if url %}
+            <div class="row" style="margin-bottom: 20px">
+                <div class="col-md-6 col-md-offset-3">
+                    <button id="copy"
+                            class="btn btn-primary btn-block">{{ url }}</button>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row">
+
+            <div class="col-md-6 col-md-offset-3">
+                <pre><code class="{{ lang }}">{{ code }}</code></pre>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

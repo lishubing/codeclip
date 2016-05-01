@@ -1,0 +1,98 @@
+{% extends "bootstrap/base.html" %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js"></script>
+    <script>
+        var el = document.querySelector('textarea');
+
+        el.addEventListener("keydown", function (e) {
+            var keyCode = e.keyCode || e.which;
+
+            if (keyCode === 9) {
+                var start = el.selectionStart,
+                        end = el.selectionEnd,
+                        value = el.value;
+
+                var lineStart = value.lastIndexOf('\n', start),
+                        lineEnd = value.indexOf('\n', end),
+                        offset = 0;
+
+                if (lineStart === -1) lineStart = 0;
+                if (lineEnd === -1) lineEnd = value.length;
+
+                if (lineStart === lineEnd);
+                else if (lineStart !== 0) lineStart += 1;
+
+                lines = value.substring(lineStart, lineEnd).split('\n');
+                console.log([lineStart, lineEnd], lines);
+
+                if (lines.length > 1) {
+                    offset = lines.length;
+                    lines = '\t' + lines.join('\n\t');
+
+                    el.value = value.substring(0, lineStart) + lines + value.substring(lineEnd);
+
+                    el.selectionStart = start + 1;
+                    el.selectionEnd = end + offset;
+                } else {
+                    offset = 1;
+                    lines = lines[0];
+
+                    el.value = value.substring(0, start) + '\t' + value.substring(end);
+
+                    el.selectionStart = el.selectionEnd = start + offset;
+                }
+
+                e.preventDefault();
+            }
+        });
+        $("#code").blur(function () {
+            var language = hljs.highlightAuto($("#code").val())["language"];
+            if (language != null) {
+                $("#lang").val(language);
+            }
+        })
+    </script>
+{% endblock %}
+{% block title %}Code Clip{% endblock %}
+{% block content %}
+
+    <div class="page-header col-md-6 col-md-offset-3">
+        <h1>Code Clipboard
+            <small>Share your code</small>
+        </h1>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3">
+                <form action="/post" method="post">
+                    <div class="form-group">
+                        <label>Code:</label>
+                        <textarea class="form-control" rows="20"
+                                  name="code" id="code"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Language:</label>
+                        <select id="lang" class="form-control"
+                                name="lang">
+
+                            {% for lang_name, lang_value in lang %}
+                                <option value="{{ lang_value }}">{{ lang_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="checkbox">
+                        <label>
+                            <input name="short" type="checkbox"> Generate Short
+                            URL
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Post
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
