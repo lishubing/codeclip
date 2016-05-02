@@ -10,6 +10,7 @@ from redis import Redis
 
 app = Flask(__name__)
 redis = Redis()
+Bootstrap(app)
 
 
 @app.route(u'/')
@@ -68,5 +69,5 @@ def post():
 
 
 if __name__ == '__main__':
-    Bootstrap(app)
+
     app.run(u'0.0.0.0', port=8001, debug=True)
