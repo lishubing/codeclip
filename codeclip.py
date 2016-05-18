@@ -1,8 +1,7 @@
 # coding=utf-8
 
-import uuid
-import base64
 import pickle
+import random
 import requests
 from flask import Flask, render_template, request, redirect, url_for
 from flask.ext.bootstrap import Bootstrap
@@ -11,6 +10,14 @@ from redis import Redis
 app = Flask(__name__)
 redis = Redis()
 Bootstrap(app)
+
+
+def create_key(length=8):
+    """create a random key
+    :param length: length of key
+    """
+    chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    return ''.join([random.choice(chars) for _ in range(length)])
 
 
 @app.route(u'/')
@@ -41,7 +48,10 @@ def get_code(key):
         url = res_json['urls'][0]['url_short']
     else:
         url = None
-    code_data = pickle.loads(redis.get(u'codeclip_{0}'.format(key)))
+    redis_data = redis.get(u'codeclip_{0}'.format(key))
+    if not redis_data:
+        return 'Not Found', 404
+    code_data = pickle.loads(redis_data)
     code = code_data['code']
     lang = code_data['lang']
     if code:
@@ -61,7 +71,7 @@ def post():
         url = 'normal'
     if not code:
         return 'Bad Request', 400
-    key = uuid.uuid4().hex[:6]
+    key = create_key()
     code_data = dict(code=code, lang=lang)
     redis.set(u'codeclip_{0}'.format(key), pickle.dumps(code_data))
     return redirect(url_for(u'.get_code', key=key, url=url))
