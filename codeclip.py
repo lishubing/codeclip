@@ -34,9 +34,11 @@ def get_code(key):
         url = request.host_url.rstrip('/') + url_for(u'.get_code', key=key)
     elif url_type == 'short':
         url = request.host_url.rstrip('/') + url_for(u'.get_code', key=key)
-        res = requests.post('https://url.gy/shorten/create',
-                            data={'Url': url})
-        url = res.text.strip('"')
+        res = requests.get('http://api.weibo.com/2/short_url/shorten.json'
+                           '?source=2849184197&url_long={url}'
+                           .format(url=url))
+        res_json = res.json()
+        url = res_json['urls'][0]['url_short']
     else:
         url = None
     code_data = pickle.loads(redis.get(u'codeclip_{0}'.format(key)))
@@ -66,5 +68,4 @@ def post():
 
 
 if __name__ == '__main__':
-
     app.run(u'0.0.0.0', port=8001, debug=True)
