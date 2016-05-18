@@ -42,8 +42,6 @@ def get_code(key):
     code_data = pickle.loads(redis.get(u'codeclip_{0}'.format(key)))
     code = code_data['code']
     lang = code_data['lang']
-    code = base64.b64decode(code)
-    print code
     if code:
         return render_template(u'clip.html', code=code, lang=lang, url=url)
     else:
@@ -62,7 +60,6 @@ def post():
     if not code:
         return 'Bad Request', 400
     key = uuid.uuid4().hex[:6]
-    code = base64.b64encode(code)
     code_data = dict(code=code, lang=lang)
     redis.set(u'codeclip_{0}'.format(key), pickle.dumps(code_data))
     return redirect(url_for(u'.get_code', key=key, url=url))
